@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -125,25 +124,6 @@ func (d *Driver) GetState() (state.State, error) {
 	return state.None, nil
 }
 
-func copyFile(inFile, outFile string) error {
-	in, err := os.Open(inFile)
-	if err != nil {
-		return err
-	}
-	defer in.Close()
-	out, err := os.Create(outFile)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, in)
-	if err != nil {
-		return err
-	}
-	err = out.Sync()
-	return err
-}
-
 func (d *Driver) Create() error {
 	err := hypervAvailable()
 	if err != nil {
@@ -170,7 +150,9 @@ func (d *Driver) Create() error {
 			return err
 		}
 	} else {
-		copyFile(d.boot2DockerLoc, filepath.Join(d.storePath, "boot2docker.iso"))
+		if err := utils.CopyFile(d.boot2DockerLoc, filepath.Join(d.storePath, "boot2docker.iso")); err != nil {
+			return err
+		}
 	}
 
 	log.Infof("Creating SSH key...")
