@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"path/filepath"
 	"path"
+	"path/filepath"
 	"regexp"
 	"time"
 
